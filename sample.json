@@ -1,0 +1,14 @@
+{
+    "shop_info": {
+        "name": "ABC store",
+        "location": "Tokyo"
+        },
+    "items": [
+        {
+            "name": "T-shirt",
+            "description": "T-shirt",
+            "price": 5980,
+            "tax": 1.1
+        }
+    ]
+}
