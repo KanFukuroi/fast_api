@@ -15,7 +15,7 @@ app = FastAPI()
 
 @app.post("/item/")
 async def create_item(item: Item):
-    return item
+    return {"message": f"{item.name}は税込価格、{int(item.price * item.tax)}円です"}
 
 
 @app.get("/countries/")
