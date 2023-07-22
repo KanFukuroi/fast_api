@@ -1,17 +1,12 @@
 import streamlit as st
-import pandas as pd
 
-st.title("Sample App")
 
-df = pd.DataFrame({"1列目": [1, 2, 3, 4], "2列目": [5, -2, -3, -4]})
+number = st.sidebar.slider("Pick a Num", 0, 100, 50)
 
-st.dataframe(df.style.highlight_max(axis=1), width=200, height=200)
+st.sidebar.write(f"number: {number}")
 
-st.json(
-    {
-        "data": {
-            "name": "abc",
-            "age": 123,
-        }
-    }
-)
+
+left_col, center_col, right_col = st.columns(3)
+left_col.slider("Pick a Num", 0, 100)
+center_col.slider("middle column", 0, 100)
+right_col.slider("right column", 0, 100)
