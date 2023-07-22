@@ -1,13 +1,17 @@
 import streamlit as st
+import pandas as pd
 
+st.title("Sample App")
 
-st.title("sample app")
-st.markdown(
-    """
-    # 見出し1
-    ## 見出し2
+df = pd.DataFrame({"1列目": [1, 2, 3, 4], "2列目": [5, -2, -3, -4]})
 
-    - 箇条書き1
-    - 箇条書き2
-    """
+st.dataframe(df.style.highlight_max(axis=1), width=200, height=200)
+
+st.json(
+    {
+        "data": {
+            "name": "abc",
+            "age": 123,
+        }
+    }
 )
