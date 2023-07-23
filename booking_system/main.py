@@ -32,7 +32,7 @@ async def index():
 
 
 @app.post("/users")
-async def users(user: User):
+async def users(users: User):
     return {"users": users}
 
 
