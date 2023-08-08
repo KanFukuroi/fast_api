@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime
-import random
+
+# import random
 import requests
 import json
 import pandas as pd
@@ -45,29 +46,68 @@ elif page == "bookings":
     users = res.json()
 
     # ユーザー名をキー、ユーザーIDをバリュー
-    users_dict = {}
+    users_name = {}
     for user in users:
-        users_dict[user["user_name"]] = user["user_id"]
+        users_name[user["user_name"]] = user["user_id"]
 
     # 会議室一覧取得
     url_rooms = "http://127.0.0.1:8000/rooms"
     res = requests.get(url_rooms)
     rooms = res.json()
-
-    rooms_dict = {}
+    rooms_name = {}
     for room in rooms:
-        rooms_dict[room["room_name"]] = {
+        rooms_name[room["room_name"]] = {
             "room_id": room["room_id"],
             "capacity": room["capacity"],
         }
     st.write("### 会議室一覧")
     df_rooms = pd.DataFrame.from_dict(rooms)
     df_rooms.columns = ["会議室名", "定員", "会議室ID"]
-
     st.table(df_rooms)
+
+    url_bookings = "http://127.0.0.1:8000/bookings"
+    res = requests.get(url_bookings)
+    bookings = res.json()
+    df_bookings = pd.DataFrame(bookings)
+
+    users_id = {}
+    for user in users:
+        users_id[user["user_id"]] = user["user_name"]
+
+    rooms_id = {}
+    for room in rooms:
+        rooms_id[room["room_id"]] = {
+            "room_name": room["room_name"],
+            "capacity": room["capacity"],
+        }
+    # IDを各値に変更
+    to_user_name = lambda x: users_id[x]
+    to_room_name = lambda x: rooms_id[x]["room_name"]
+    to_datetime = lambda x: datetime.datetime.fromisoformat(x).strftime(
+        "%Y/%m/%d %H:%M"
+    )
+
+    # 特定の列に適用
+    df_bookings["user_id"] = df_bookings["user_id"].map(to_user_name)
+    df_bookings["room_id"] = df_bookings["room_id"].map(to_room_name)
+    df_bookings["start_datetime"] = df_bookings["start_datetime"].map(to_datetime)
+    df_bookings["end_datetime"] = df_bookings["end_datetime"].map(to_datetime)
+
+    df_bookings = df_bookings.rename(
+        columns={
+            "user_id": "予約者名",
+            "room_id": "会議室名",
+            "booked_num": "予約人数",
+            "start_datetime": "開始時刻",
+            "end_datetime": "終了時刻",
+            "booking_id": "予約番号",
+        }
+    )
+    st.write("### 予約一覧")
+    st.table(df_bookings)
     with st.form(key="booking"):
-        user_name: str = st.selectbox("予約者名", list(users_dict.keys()))
-        room_name: str = st.selectbox("会議室名", list(rooms_dict.keys()))
+        user_name: str = st.selectbox("予約者名", list(users_name.keys()))
+        room_name: str = st.selectbox("会議室名", list(rooms_name.keys()))
         booked_num: int = st.number_input("予約人数", step=1, min_value=1)
         date = st.date_input("日付: ", min_value=datetime.date.today())
         start_time = st.time_input("開始時刻: ", value=datetime.time(hour=9, minute=0))
@@ -75,9 +115,9 @@ elif page == "bookings":
         submit_button = st.form_submit_button(label="予約")
 
     if submit_button:
-        user_id: int = users_dict[user_name]
-        room_id: int = rooms_dict[room_name]["room_id"]
-        capacity: int = rooms_dict[room_name]["capacity"]
+        user_id: int = users_name[user_name]
+        room_id: int = rooms_name[room_name]["room_id"]
+        capacity: int = rooms_name[room_name]["capacity"]
         data = {
             "user_id": user_id,
             "room_id": room_id,
